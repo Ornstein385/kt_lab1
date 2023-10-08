@@ -3,9 +3,13 @@ package org.example;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.awt.*;
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Main {
@@ -21,7 +25,7 @@ public class Main {
     private static void searchResults(String query) {
         try {
             // Создаем URL-объект со ссылкой на API википедии
-            String searchQuery = URLEncoder.encode(query, "UTF-8");
+            String searchQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
             URL url = new URL("https://ru.wikipedia.org/w/api.php?action=query&list=search&utf8=&format=json&srsearch=" + searchQuery);
 
             // Открываем HttpURLConnection для получения JSON-ответа
@@ -44,22 +48,12 @@ public class Main {
             // Извлекаем список результатов
             JsonNode searchResults = jsonNode.get("query").get("search");
 
-            // Открываем каждый результат в браузере
             for (JsonNode result : searchResults) {
                 String pageID = result.get("pageid").asText();
-                openPageInBrowser(pageID);
+                System.out.println(result.get("title") + ": " + "https://ru.wikipedia.org/w/index.php?curid=" + pageID);
             }
         } catch (IOException e){
             System.out.println("ошибка чтения текста");
-        }
-    }
-
-    private static void openPageInBrowser(String pageID) throws IOException {
-        String wikipediaURL = "https://ru.wikipedia.org/w/index.php?curid=" + pageID;
-        URI uri = URI.create(wikipediaURL);
-
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            Desktop.getDesktop().browse(uri);
         }
     }
 }
